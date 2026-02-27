@@ -1,0 +1,88 @@
+.attempt-page {
+  padding: 1rem;
+
+  &__header {
+    margin-bottom: 1.5rem;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  &__question,
+  &__editor {
+    background-color: #f9fafb;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+  }
+
+  &__editor .monaco-editor {
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+}
+
+  &__editor button {
+    padding: 0.5rem 1rem;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  &__results {
+    margin-top: 2rem;
+    overflow-x: auto;
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th,
+    td {
+      border: 1px solid #e5e7eb;
+      padding: 0.5rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f3f4f6;
+      font-weight: 600;
+    }
+  }
+
+  .error {
+    color: red;
+    margin-top: 0.5rem;
+  }
+  .hint-box {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 6px;
+
+  h4 {
+    margin: 0 0 0.5rem 0;
+  }
+}
+}
+
+/* Desktop Layout (1024px and above) */
+@media (min-width: 1024px) {
+  .attempt-page {
+    &__content {
+      flex-direction: row;
+    }
+
+    &__question,
+    &__editor {
+      flex: 1;
+    }
+  }
+}

@@ -1,0 +1,12 @@
+@use "./variables" as *;
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: $background-color;
+  color: $text-color;
+}
+
+h1 {
+  text-align: center;
+  margin-top: 20px;
+}
