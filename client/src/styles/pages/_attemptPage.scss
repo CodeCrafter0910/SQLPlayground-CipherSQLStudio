@@ -5,18 +5,88 @@
 .attempt-page {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 32px 24px 80px;
+  padding: 24px 16px 80px;
   animation: fadeInUp 0.45s ease both;
+
+  @media (min-width: 641px) {
+    padding: 32px 24px 80px;
+  }
+
+  @media (min-width: 1281px) {
+    padding: 40px 32px 100px;
+  }
+}
+
+// ─── Loading State ────────────────────────────────────────────────────────────
+.attempt-page__loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  gap: 16px;
+  color: $text-secondary;
+  font-size: 0.9rem;
+}
+
+.loader-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid $border-card;
+  border-top-color: $accent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ─── Error State ──────────────────────────────────────────────────────────────
+.attempt-page__error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  gap: 16px;
+  text-align: center;
+
+  .error-state__icon {
+    font-size: 2.5rem;
+    color: $error;
+  }
+
+  p {
+    color: $text-secondary;
+    font-size: 0.9rem;
+  }
 }
 
 // ─── Header ──────────────────────────────────────────────────────────────────
 .attempt-page__header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 32px;
+  gap: 12px;
+  margin-bottom: 24px;
   padding-bottom: 20px;
   border-bottom: 1px solid $border-subtle;
+  flex-wrap: wrap;
+
+  @media (min-width: 641px) {
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+}
+
+.attempt-page__header-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex: 1;
 }
 
 .attempt-page__back {
@@ -43,25 +113,34 @@
 }
 
 .attempt-page__title {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: $text-primary;
 
-  span {
-    color: $accent;
-    @include neon-glow($accent, 0.4);
+  @media (min-width: 641px) {
+    font-size: 1.3rem;
   }
+}
+
+// ─── Save confirmation ─────────────────────────────────────────────────────
+.save-msg {
+  font-size: 0.78rem;
+  color: $success;
+  font-family: $font-mono;
+  animation: fadeInUp 0.25s ease both;
+  margin-left: auto;
 }
 
 // ─── Content Grid ─────────────────────────────────────────────────────────────
 .attempt-page__content {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 
   @media (min-width: 1024px) {
     flex-direction: row;
     align-items: flex-start;
+    gap: 20px;
   }
 }
 
@@ -73,7 +152,7 @@
   overflow: hidden;
 
   &:hover {
-    transform: none; // disable card lift for editor panels
+    transform: none;
   }
 
   @media (min-width: 1024px) {
@@ -86,9 +165,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
+  padding: 10px 16px;
   background: rgba(0, 229, 255, 0.04);
   border-bottom: 1px solid $border-subtle;
+
+  @media (min-width: 641px) {
+    padding: 12px 20px;
+  }
 }
 
 .panel-header__label {
@@ -115,18 +198,27 @@
 
 // ─── Panel Body ──────────────────────────────────────────────────────────────
 .panel-body {
-  padding: 24px;
+  padding: 16px;
+
+  @media (min-width: 641px) {
+    padding: 24px;
+  }
 }
 
 // ─── Question Text ────────────────────────────────────────────────────────────
 .question-text {
-  font-size: 0.925rem;
+  font-size: 0.9rem;
   color: $text-secondary;
   line-height: 1.75;
   background: rgba(0, 229, 255, 0.025);
   border: 1px solid $border-subtle;
   border-radius: $radius-sm;
-  padding: 16px 20px;
+  padding: 14px 16px;
+
+  @media (min-width: 641px) {
+    font-size: 0.925rem;
+    padding: 16px 20px;
+  }
 }
 
 // ─── Monaco Editor Wrapper ───────────────────────────────────────────────────
@@ -134,57 +226,91 @@
   border: 1px solid $border-subtle;
   border-radius: $radius-sm;
   overflow: hidden;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+
+  @media (min-width: 641px) {
+    margin-bottom: 16px;
+  }
 }
 
 // ─── Editor Action Buttons ────────────────────────────────────────────────────
 .editor-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
+
+  @media (min-width: 641px) {
+    gap: 12px;
+  }
 }
 
 .btn-primary {
   @include btn-primary;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
 }
 
 .btn-secondary {
   @include btn-secondary;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+  }
 }
 
 // ─── Error Message ────────────────────────────────────────────────────────────
 .error {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
-  margin-top: 16px;
-  padding: 10px 16px;
+  margin-top: 14px;
+  padding: 10px 14px;
   background: $error-dim;
   border: 1px solid rgba(255, 77, 109, 0.3);
   border-radius: $radius-sm;
   color: $error;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-family: $font-mono;
   line-height: 1.5;
   animation: fadeInUp 0.25s ease both;
+  max-width: 100%;
+  word-break: break-word;
+
+  @media (min-width: 641px) {
+    margin-top: 16px;
+    font-size: 0.85rem;
+  }
 
   &::before {
     content: '✕';
     font-size: 0.7rem;
     flex-shrink: 0;
+    margin-top: 2px;
   }
 }
 
 // ─── Hint Box ────────────────────────────────────────────────────────────────
 .hint-box {
-  margin-top: 16px;
-  padding: 20px;
+  margin-top: 14px;
+  padding: 16px;
   background: rgba(99, 102, 241, 0.08);
   border: 1px solid rgba(99, 102, 241, 0.25);
   border-left: 3px solid #6366f1;
   border-radius: $radius-sm;
   animation: fadeInUp 0.3s ease both;
+
+  @media (min-width: 641px) {
+    margin-top: 16px;
+    padding: 20px;
+  }
 
   .hint-box__label {
     @include section-label;
@@ -196,15 +322,101 @@
   }
 
   p {
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     color: #c7d2fe;
     line-height: 1.7;
   }
 }
 
+// ─── Sample Data Viewer ───────────────────────────────────────────────────────
+.sample-data {
+  @include glass-card;
+  margin-top: 20px;
+  padding: 0;
+  overflow: hidden;
+
+  &:hover {
+    transform: none;
+  }
+}
+
+.sample-data__tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid $border-subtle;
+  overflow-x: auto;
+}
+
+.sample-data__tab {
+  padding: 8px 18px;
+  font-family: $font-mono;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: $text-muted;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: $transition-fast;
+  white-space: nowrap;
+
+  &:hover {
+    color: $text-secondary;
+    background: rgba(0, 229, 255, 0.03);
+  }
+
+  &--active {
+    color: $accent;
+    border-bottom-color: $accent;
+    background: rgba(0, 229, 255, 0.05);
+  }
+}
+
+.sample-data__body {
+  padding: 16px;
+
+  @media (min-width: 641px) {
+    padding: 20px;
+  }
+}
+
+// Column schema pills
+.schema-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.schema-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(0, 229, 255, 0.06);
+  border: 1px solid $border-card;
+  border-radius: $radius-pill;
+  font-family: $font-mono;
+
+  &__name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $text-primary;
+  }
+
+  &__type {
+    font-size: 0.65rem;
+    color: $accent;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+}
+
 // ─── Results Panel ────────────────────────────────────────────────────────────
 .attempt-page__results {
-  margin-top: 24px;
+  margin-top: 20px;
   @include glass-card;
   overflow: hidden;
   padding: 0;
@@ -219,11 +431,24 @@
   padding: 0 0 4px;
 }
 
+.empty-result {
+  font-size: 0.875rem;
+  color: $text-muted;
+  font-family: $font-mono;
+  text-align: center;
+  padding: 20px 0;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
-  min-width: 400px;
+  font-size: 0.85rem;
+  min-width: 320px;
+
+  @media (min-width: 641px) {
+    font-size: 0.875rem;
+    min-width: 400px;
+  }
 }
 
 thead {
@@ -233,15 +458,20 @@ thead {
   }
 
   th {
-    padding: 12px 16px;
+    padding: 10px 14px;
     text-align: left;
     font-family: $font-mono;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: $accent;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     white-space: nowrap;
+
+    @media (min-width: 641px) {
+      padding: 12px 16px;
+      font-size: 0.72rem;
+    }
   }
 }
 
@@ -264,10 +494,15 @@ tbody {
   }
 
   td {
-    padding: 11px 16px;
+    padding: 10px 14px;
     color: $text-secondary;
     font-family: $font-mono;
-    font-size: 0.825rem;
+    font-size: 0.8rem;
     white-space: nowrap;
+
+    @media (min-width: 641px) {
+      padding: 11px 16px;
+      font-size: 0.825rem;
+    }
   }
 }

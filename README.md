@@ -1,6 +1,6 @@
 # CipherSQLStudio
 
-CipherSQLStudio is a browser-based SQL learning platform that allows students to practice SQL queries on pre-configured assignments. 
+CipherSQLStudio is a browser-based SQL learning platform that allows students to practice SQL queries on pre-configured assignments.
 
 The main idea of this project is to create an environment where students can write and execute SQL queries in real-time and also get guided hints using an AI model, without directly showing the full solution.
 
@@ -12,12 +12,14 @@ This project focuses mainly on the user experience for solving SQL assignments r
 
 In this platform, users can:
 
-- View available SQL assignments
+- View available SQL assignments loaded from MongoDB
 - Select and attempt an assignment
-- Write SQL queries using a code editor (Monaco Editor)
-- Execute queries in real-time
+- Write SQL queries using Monaco Editor (VS Code style editor)
+- Execute queries in real-time against PostgreSQL
 - View results in a formatted table
-- Get AI-generated hints if they are stuck
+- See the sample data and table schema for the assignment
+- Get AI-generated hints if they are stuck (without revealing the solution)
+- Have their query attempts automatically saved to MongoDB
 
 The database and assignments are already pre-configured. Users can only attempt and solve them.
 
@@ -27,180 +29,231 @@ The database and assignments are already pre-configured. Users can only attempt 
 
 ### Frontend
 - React (with Vite)
-- React Router
+- React Router DOM
 - Monaco Editor (for SQL editing)
 - Vanilla SCSS (mobile-first design)
 
 ### Backend
 - Node.js
 - Express.js
-- PostgreSQL (for executing SQL queries)
-- MongoDB Atlas (for persistence)
-- Groq API (for AI hint generation)
+- PostgreSQL (sandbox DB for executing SQL queries)
+- MongoDB Atlas (persistence for assignments and query attempts)
+- Groq API — Llama 3.1 8B (AI hint generation)
 
+---
 
 ## Folder Structure
 
+```
 CipherSQLStudio/
 │
-├── client/        → React frontend
+├── client/                   → React frontend
+│   ├── .env.example
 │   └── src/
 │       ├── pages/
+│       │   ├── AssignmentList.jsx
+│       │   └── AttemptPage.jsx
 │       ├── styles/
-│       └── components/
+│       │   ├── base/          (_variables, _mixins, _global)
+│       │   ├── components/    (_navbar)
+│       │   ├── pages/         (_assignmentList, _attemptPage)
+│       │   └── main.scss
+│       ├── App.jsx
+│       └── main.jsx
 │
-├── server/        → Express backend
-│   ├── controllers/
-│   ├── routes/
+├── server/                   → Express backend
+│   ├── .env.example
 │   ├── config/
+│   │   ├── db.js             (MongoDB connection)
+│   │   └── postgres.js       (PostgreSQL pool)
+│   ├── controllers/
+│   │   ├── assignmentController.js
+│   │   ├── queryController.js
+│   │   ├── hintController.js
+│   │   └── attemptController.js
+│   ├── models/
+│   │   ├── Assignment.js     (Mongoose model)
+│   │   └── Attempt.js        (Mongoose model)
+│   ├── routes/
+│   │   ├── assignmentRoutes.js
+│   │   ├── queryRoutes.js
+│   │   ├── hintRoutes.js
+│   │   └── attemptRoutes.js
+│   ├── seed.js               (Seed assignments into MongoDB)
 │   └── server.js
 │
 └── README.md
+```
 
+---
 
 ## How to Run the Project
 
 ### 1. Clone the Repository
 
-  bash
+```bash
 git clone <repository-url>
 cd CipherSQLStudio
+```
 
+---
 
 ## Backend Setup
 
-Go to server folder:
-
-  bash
+```bash
 cd server
 npm install
- 
+```
 
-Create a .env file inside the server folder using the .env.example file as reference.
+Create a `.env` file inside the `server/` folder using `.env.example` as reference:
 
-You need to configure:
+```
+PORT=5000
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=ciphersqlstudio
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_password_here
+MONGO_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/ciphersqlstudio
+GROQ_API_KEY=your_groq_api_key_here
+```
 
-- PostgreSQL credentials
-- MongoDB connection string
-- Groq API key
+**Seed the database** (first time setup — inserts assignments into MongoDB):
 
-Start backend:
+```bash
+npm run seed
+```
 
-   bash
+**Start the backend:**
+
+```bash
 npm start
+```
 
+Backend runs on: `http://localhost:5000`
 
-Backend runs on:
- 
-http://localhost:5000
- 
+---
 
 ## Frontend Setup
 
-Go to client folder:
-
-   bash
+```bash
 cd client
 npm install
+```
+
+Create a `.env` file inside the `client/` folder using `.env.example` as reference:
+
+```
+VITE_API_URL=http://localhost:5000
+```
+
+**Start the frontend:**
+
+```bash
 npm run dev
- 
-Frontend runs on:
- 
-http://localhost:5173
- 
+```
+
+Frontend runs on: `http://localhost:5173`
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/assignments` | List all assignments |
+| GET | `/api/assignments/:id` | Get single assignment with question, schema, and sample data |
+| POST | `/api/execute` | Execute a SQL query against PostgreSQL |
+| POST | `/api/hint` | Get an AI hint for the current query |
+| POST | `/api/attempts` | Save a query attempt to MongoDB |
+| GET | `/api/attempts/:assignmentId` | Get all attempts for an assignment |
+
+---
 
 ## How Query Execution Works (Data Flow)
 
-1. User writes SQL query in Monaco Editor.
-2. Clicks "Execute Query".
-3. Frontend sends a POST request to `/api/execute`.
-4. Backend validates the query (only SELECT allowed).
-5. If valid, PostgreSQL executes it.
-6. Results are sent back as JSON.
-7. Frontend displays results in a dynamic table.
+1. User selects an assignment → frontend fetches it from MongoDB via `/api/assignments/:id`
+2. Assignment question, table schema, and sample data are displayed
+3. User writes a SQL query in the Monaco Editor
+4. User clicks **Execute Query**
+5. Frontend sends a POST request to `/api/execute` with the query and assignmentId
+6. Backend validates the query — only SELECT queries are allowed
+7. If valid, PostgreSQL executes the query against the sandbox database
+8. Results are returned as JSON and displayed in a dynamic table
+9. The attempt (query, success, rowCount) is saved to MongoDB
 
 ---
 
 ## LLM Hint System
 
-This project uses Groq API to generate hints for students.
+This project uses Groq API (Llama 3.1 8B-instant model) to generate hints.
 
-When the user clicks "Get Hint":
+When the user clicks **Get Hint**:
 
-1. The frontend sends the assignment question and the user's current query.
-2. Backend builds a controlled prompt.
-3. The AI model generates a conceptual hint.
-4. The hint is displayed in the UI.
+1. The frontend sends the real assignment question and user's current query to `/api/hint`
+2. Backend builds a controlled prompt with strict instructions
+3. The AI model generates a conceptual hint — no full SQL code
+4. The hint is displayed in the UI
 
-### Important
+### Prompt Engineering
 
-The prompt clearly instructs the model:
+The prompt instructs the model:
+- NOT to provide the full SQL query
+- NOT to reveal complete solutions
+- Only to give conceptual guidance (which clause to use, how to think about it)
 
-- Not to provide the full SQL query.
-- Not to reveal complete solutions.
-- Only to give guidance.
-
-This ensures that students get help without directly getting answers.
-
+---
 
 ## Security Measures
 
-- Only SELECT queries are allowed.
-- Destructive queries like DROP, DELETE, UPDATE are blocked.
-- Environment variables are stored in `.env`.
-- API keys are not exposed to the frontend.
-- All database interaction is handled by the backend.
+- Only SELECT queries are allowed — destructive queries (DROP, DELETE, UPDATE, INSERT) are blocked
+- Environment variables are stored in `.env` (never committed to git)
+- API keys are never exposed to the frontend
+- All database interactions are handled by the backend
 
 ---
 
 ## Responsive Design
 
-The UI follows a mobile-first approach.
+The UI follows a **mobile-first** approach.
 
-Breakpoints considered:
-- 320px (Mobile)
-- 641px (Tablet)
-- 1024px (Desktop)
-- 1281px (Large screens)
+Breakpoints:
+- **320px** — Mobile (base)
+- **641px** — Tablet
+- **1024px** — Desktop
+- **1281px** — Large screens
 
 SCSS features used:
-- Variables
+- Variables (`_variables.scss`)
+- Mixins (`_mixins.scss` — includes `bp()` breakpoint mixin, `glass-card`, `btn-primary`, etc.)
 - Nesting
-- Partial files
-- BEM naming convention
+- Partial files imported via `main.scss`
+- BEM naming convention throughout
 
 ---
 
 ## Design Decisions
 
-- PostgreSQL is used as a sandbox database to simulate real SQL practice.
-- MongoDB is used for flexible data storage.
-- Monaco Editor gives a real coding experience similar to VS Code.
-- Groq API is used for fast and cost-efficient hint generation.
-- Query validation is implemented to prevent database misuse.
+- **PostgreSQL** is used as a sandbox database to simulate real SQL practice environments
+- **MongoDB** stores assignment metadata (question, schema, difficulty) and user attempt history
+- **Monaco Editor** provides a real VS Code-like coding experience in the browser
+- **Groq API** is used for fast and cost-efficient hint generation via Llama 3.1
+- Query validation prevents database misuse
 
 ---
 
 ## Limitations
 
-- Only SELECT queries are supported.
-- No authentication system is implemented.
-- Assignments are pre-configured and cannot be created by users.
+- Only SELECT queries are supported (by design)
+- No authentication system in the current version
+- Assignments are pre-seeded and cannot be created by users via the UI
 
 ---
 
 ## Future Improvements
 
 - Add user authentication (Login/Signup)
-- Save query attempt history
-- Track assignment progress
-- Add admin dashboard
-- Add automatic query correctness checking
-
----
-
-## Conclusion
-
-CipherSQLStudio provides a practical SQL learning environment where students can execute real queries and receive AI-based hints while maintaining security and learning integrity.
-
-This project helped me understand full-stack development, database interaction, API integration, prompt engineering, and responsive UI design.
+- Track individual user progress
+- Add admin dashboard for managing assignments
+- Automatic query correctness checking (compare result sets)
+- Leaderboard / scoring system

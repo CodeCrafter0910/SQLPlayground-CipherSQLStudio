@@ -6,6 +6,7 @@ require("./config/postgres");
 const queryRoutes = require("./routes/queryRoutes");
 const assignmentRoutes = require("./routes/assignmentRoutes");
 const hintRoutes = require("./routes/hintRoutes");
+const attemptRoutes = require("./routes/attemptRoutes");
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use("/api", queryRoutes);
 app.use("/api", assignmentRoutes);
 app.use("/api/hint", hintRoutes);
+app.use("/api", attemptRoutes);
 
 app.get("/", (req, res) => {
   res.send("CipherSQLStudio Backend Running");

@@ -3,14 +3,47 @@ import { useEffect, useState } from "react";
 
 function AssignmentList() {
   const [assignments, setAssignments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/api/assignments`)
-      .then((res) => res.json())
-      .then((data) => setAssignments(data))
-      .catch((err) => console.error(err));
+      .then((res) => {
+        if (!res.ok) throw new Error("Server error. Please try again.");
+        return res.json();
+      })
+      .then((data) => {
+        setAssignments(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message || "Failed to load assignments.");
+        setLoading(false);
+      });
   }, []);
+
+  if (loading) {
+    return (
+      <div className="assignment-list">
+        <div className="assignment-list__loader">
+          <div className="loader-spinner" />
+          <p>Loading assignments...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="assignment-list">
+        <div className="assignment-list__error">
+          <span>⚠</span>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="assignment-list">
@@ -27,7 +60,7 @@ function AssignmentList() {
       {/* ── Cards Grid ── */}
       <div className="assignment-list__grid">
         {assignments.map((assignment, index) => (
-          <div key={assignment.id} className="assignment-card">
+          <div key={assignment._id} className="assignment-card">
             <div className="assignment-card__body">
               <p className="assignment-card__id">Assignment #{index + 1}</p>
               <h3 className="assignment-card__title">{assignment.title}</h3>
@@ -45,7 +78,7 @@ function AssignmentList() {
             <div className="assignment-card__footer">
               <button
                 className="btn-primary"
-                onClick={() => navigate(`/attempt/${assignment.id}`)}
+                onClick={() => navigate(`/attempt/${assignment._id}`)}
               >
                 Start Challenge →
               </button>

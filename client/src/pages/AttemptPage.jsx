@@ -1,56 +1,94 @@
 import Editor from "@monaco-editor/react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function AttemptPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const [assignment, setAssignment] = useState(null);
+  const [loadingAssignment, setLoadingAssignment] = useState(true);
+  const [assignmentError, setAssignmentError] = useState("");
+
   const [query, setQuery] = useState("");
   const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [queryError, setQueryError] = useState("");
+  const [loadingQuery, setLoadingQuery] = useState(false);
+
   const [hint, setHint] = useState("");
   const [loadingHint, setLoadingHint] = useState(false);
 
+  const [activeTable, setActiveTable] = useState(0);
+  const [savedMsg, setSavedMsg] = useState("");
+
+  // Fetch the real assignment from MongoDB via the backend
+  useEffect(() => {
+    setLoadingAssignment(true);
+    setAssignmentError("");
+
+    fetch(`${import.meta.env.VITE_API_URL}/api/assignments/${id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Assignment not found");
+        return res.json();
+      })
+      .then((data) => {
+        setAssignment(data);
+        setLoadingAssignment(false);
+      })
+      .catch((err) => {
+        setAssignmentError(err.message || "Failed to load assignment.");
+        setLoadingAssignment(false);
+      });
+  }, [id]);
+
   const executeQuery = () => {
+    if (!query.trim()) return;
+    setLoadingQuery(true);
+    setQueryError("");
+    setResult(null);
+
     fetch(`${import.meta.env.VITE_API_URL}/api/execute`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ query }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setResult(data.rows);
-          setError("");
-        } else {
-          setError(data.error);
-          setResult(null);
-        }
-      })
-      .catch((err) => console.error(err));
-  };
-
-  const getHint = () => {
-    setLoadingHint(true);
-
-    fetch(`${import.meta.env.VITE_API_URL}/api/hint`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        question: "Write a SQL query to solve this assignment.",
-        userQuery: query,
+        query,
+        assignmentId: assignment?._id || null,
       }),
     })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          setHint(data.hint);
+          setResult(data.rows);
+          setQueryError("");
+          setSavedMsg("✓ Attempt saved");
+          setTimeout(() => setSavedMsg(""), 3000);
+        } else {
+          setQueryError(data.error);
+          setResult(null);
         }
+        setLoadingQuery(false);
+      })
+      .catch((err) => {
+        setQueryError(err.message || "Request failed. Is the server running?");
+        setLoadingQuery(false);
+      });
+  };
+
+  const getHint = () => {
+    if (!assignment) return;
+    setLoadingHint(true);
+
+    fetch(`${import.meta.env.VITE_API_URL}/api/hint`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        question: assignment.question,
+        userQuery: query,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setHint(data.hint);
         setLoadingHint(false);
       })
       .catch((err) => {
@@ -59,6 +97,33 @@ function AttemptPage() {
       });
   };
 
+  // ── Loading state ──────────────────────────────────────────────────────────
+  if (loadingAssignment) {
+    return (
+      <div className="attempt-page">
+        <div className="attempt-page__loader">
+          <div className="loader-spinner" />
+          <p>Loading assignment...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Error state ────────────────────────────────────────────────────────────
+  if (assignmentError) {
+    return (
+      <div className="attempt-page">
+        <div className="attempt-page__error-state">
+          <span className="error-state__icon">⚠</span>
+          <p>{assignmentError}</p>
+          <button className="btn-primary" onClick={() => navigate("/")}>
+            ← Back to Assignments
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="attempt-page">
       {/* ── Header ── */}
@@ -66,12 +131,18 @@ function AttemptPage() {
         <button className="attempt-page__back" onClick={() => navigate("/")}>
           ←
         </button>
-        <h2 className="attempt-page__title">
-          Assignment <span>#{id}</span>
-        </h2>
+        <div className="attempt-page__header-info">
+          <h2 className="attempt-page__title">
+            {assignment.title}
+          </h2>
+          <span className={`badge badge--${assignment.difficulty}`}>
+            {assignment.difficulty}
+          </span>
+        </div>
+        {savedMsg && <span className="save-msg">{savedMsg}</span>}
       </div>
 
-      {/* ── Content ── */}
+      {/* ── Content Grid ── */}
       <div className="attempt-page__content">
         {/* Question Panel */}
         <div className="attempt-page__question">
@@ -82,9 +153,7 @@ function AttemptPage() {
             </span>
           </div>
           <div className="panel-body">
-            <p className="question-text">
-              Write a SQL query to solve this assignment.
-            </p>
+            <p className="question-text">{assignment.question}</p>
           </div>
         </div>
 
@@ -104,7 +173,7 @@ function AttemptPage() {
                 language="sql"
                 theme="vs-dark"
                 value={query}
-                onChange={(value) => setQuery(value)}
+                onChange={(value) => setQuery(value || "")}
                 options={{
                   fontSize: 14,
                   minimap: { enabled: false },
@@ -118,21 +187,27 @@ function AttemptPage() {
             </div>
 
             <div className="editor-actions">
-              <button className="btn-primary" onClick={executeQuery}>
-                ▶ Execute Query
+              <button
+                className="btn-primary"
+                onClick={executeQuery}
+                disabled={loadingQuery}
+              >
+                {loadingQuery ? "⟳ Running..." : "▶ Execute Query"}
               </button>
-              <button className="btn-secondary" onClick={getHint}>
+              <button
+                className="btn-secondary"
+                onClick={getHint}
+                disabled={loadingHint}
+              >
                 {loadingHint ? "⟳ Loading..." : "✦ Get Hint"}
               </button>
             </div>
 
-            {error && <p className="error">{error}</p>}
+            {queryError && <p className="error">{queryError}</p>}
 
             {hint && (
               <div className="hint-box">
-                <div className="hint-box__label">
-                  ✦ AI Hint
-                </div>
+                <div className="hint-box__label">✦ AI Hint</div>
                 <p>{hint}</p>
               </div>
             )}
@@ -140,7 +215,84 @@ function AttemptPage() {
         </div>
       </div>
 
-      {/* ── Results ── */}
+      {/* ── Sample Data Viewer ── */}
+      {assignment.tables && assignment.tables.length > 0 && (
+        <div className="sample-data">
+          <div className="panel-header">
+            <span className="panel-header__label">
+              <span className="panel-header__icon">🗄️</span>
+              Sample Data &amp; Schema
+            </span>
+            <span className="panel-header__lang">
+              {assignment.tables.length} table{assignment.tables.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+
+          {/* Table tabs */}
+          {assignment.tables.length > 1 && (
+            <div className="sample-data__tabs">
+              {assignment.tables.map((tbl, idx) => (
+                <button
+                  key={idx}
+                  className={`sample-data__tab${activeTable === idx ? " sample-data__tab--active" : ""}`}
+                  onClick={() => setActiveTable(idx)}
+                >
+                  {tbl.tableName}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="sample-data__body">
+            {(() => {
+              const tbl = assignment.tables[activeTable];
+              return (
+                <>
+                  {/* Schema columns */}
+                  <div className="schema-pill-row">
+                    {tbl.columns.map((col, i) => (
+                      <span key={i} className="schema-pill">
+                        <span className="schema-pill__name">{col.name}</span>
+                        <span className="schema-pill__type">{col.type}</span>
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Sample rows table */}
+                  {tbl.sampleRows && tbl.sampleRows.length > 0 && (
+                    <div className="results-table-wrap">
+                      <table>
+                        <thead>
+                          <tr>
+                            {tbl.columns.map((col) => (
+                              <th key={col.name}>{col.name}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {tbl.sampleRows.map((row, ri) => (
+                            <tr key={ri}>
+                              {tbl.columns.map((col) => (
+                                <td key={col.name}>
+                                  {row[col.name] !== undefined && row[col.name] !== null
+                                    ? String(row[col.name])
+                                    : "—"}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* ── Results Panel ── */}
       {result && result.length > 0 && (
         <div className="attempt-page__results">
           <div className="panel-header">
@@ -148,7 +300,9 @@ function AttemptPage() {
               <span className="panel-header__icon">📊</span>
               Query Results
             </span>
-            <span className="panel-header__lang">{result.length} row{result.length !== 1 ? "s" : ""}</span>
+            <span className="panel-header__lang">
+              {result.length} row{result.length !== 1 ? "s" : ""}
+            </span>
           </div>
           <div className="results-table-wrap">
             <table>
@@ -163,12 +317,27 @@ function AttemptPage() {
                 {result.map((row, index) => (
                   <tr key={index}>
                     {Object.values(row).map((value, i) => (
-                      <td key={i}>{value}</td>
+                      <td key={i}>{value !== null ? String(value) : "NULL"}</td>
                     ))}
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Empty result message */}
+      {result && result.length === 0 && (
+        <div className="attempt-page__results">
+          <div className="panel-header">
+            <span className="panel-header__label">
+              <span className="panel-header__icon">📊</span>
+              Query Results
+            </span>
+          </div>
+          <div className="panel-body">
+            <p className="empty-result">Query executed successfully — 0 rows returned.</p>
           </div>
         </div>
       )}
