@@ -6,7 +6,7 @@ function AssignmentList() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/assignments")
+    fetch("https://sqlplayground-ciphersqlstudio.onrender.com/api/assignments")
       .then((res) => res.json())
       .then((data) => setAssignments(data))
       .catch((err) => console.error(err));
