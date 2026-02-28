@@ -1,88 +1,273 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
+// ─── Attempt Page ─────────────────────────────────────────────────────────────
 .attempt-page {
-  padding: 1rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+  animation: fadeInUp 0.45s ease both;
+}
 
-  &__header {
-    margin-bottom: 1.5rem;
+// ─── Header ──────────────────────────────────────────────────────────────────
+.attempt-page__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid $border-subtle;
+}
+
+.attempt-page__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: $bg-card;
+  border: 1px solid $border-card;
+  border-radius: $radius-sm;
+  color: $text-secondary;
+  font-size: 1.1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: $transition-fast;
+  flex-shrink: 0;
+
+  &:hover {
+    border-color: $accent;
+    color: $accent;
+    box-shadow: 0 0 10px $accent-glow;
+  }
+}
+
+.attempt-page__title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: $text-primary;
+
+  span {
+    color: $accent;
+    @include neon-glow($accent, 0.4);
+  }
+}
+
+// ─── Content Grid ─────────────────────────────────────────────────────────────
+.attempt-page__content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  @media (min-width: 1024px) {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+// ─── Panel Base ──────────────────────────────────────────────────────────────
+.attempt-page__question,
+.attempt-page__editor {
+  @include glass-card;
+  padding: 0;
+  overflow: hidden;
+
+  &:hover {
+    transform: none; // disable card lift for editor panels
   }
 
-  &__content {
+  @media (min-width: 1024px) {
+    flex: 1;
+  }
+}
+
+// ─── Panel Header Bar ────────────────────────────────────────────────────────
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: rgba(0, 229, 255, 0.04);
+  border-bottom: 1px solid $border-subtle;
+}
+
+.panel-header__label {
+  @include section-label;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .panel-header__icon {
+    font-size: 0.85rem;
+  }
+}
+
+.panel-header__lang {
+  font-family: $font-mono;
+  font-size: 0.65rem;
+  color: $accent;
+  background: $accent-glow;
+  border: 1px solid $border-card;
+  border-radius: $radius-pill;
+  padding: 2px 8px;
+  letter-spacing: 0.06em;
+}
+
+// ─── Panel Body ──────────────────────────────────────────────────────────────
+.panel-body {
+  padding: 24px;
+}
+
+// ─── Question Text ────────────────────────────────────────────────────────────
+.question-text {
+  font-size: 0.925rem;
+  color: $text-secondary;
+  line-height: 1.75;
+  background: rgba(0, 229, 255, 0.025);
+  border: 1px solid $border-subtle;
+  border-radius: $radius-sm;
+  padding: 16px 20px;
+}
+
+// ─── Monaco Editor Wrapper ───────────────────────────────────────────────────
+.editor-monaco-wrap {
+  border: 1px solid $border-subtle;
+  border-radius: $radius-sm;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+// ─── Editor Action Buttons ────────────────────────────────────────────────────
+.editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  @include btn-primary;
+}
+
+.btn-secondary {
+  @include btn-secondary;
+}
+
+// ─── Error Message ────────────────────────────────────────────────────────────
+.error {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 16px;
+  background: $error-dim;
+  border: 1px solid rgba(255, 77, 109, 0.3);
+  border-radius: $radius-sm;
+  color: $error;
+  font-size: 0.85rem;
+  font-family: $font-mono;
+  line-height: 1.5;
+  animation: fadeInUp 0.25s ease both;
+
+  &::before {
+    content: '✕';
+    font-size: 0.7rem;
+    flex-shrink: 0;
+  }
+}
+
+// ─── Hint Box ────────────────────────────────────────────────────────────────
+.hint-box {
+  margin-top: 16px;
+  padding: 20px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-left: 3px solid #6366f1;
+  border-radius: $radius-sm;
+  animation: fadeInUp 0.3s ease both;
+
+  .hint-box__label {
+    @include section-label;
+    color: #818cf8;
+    margin-bottom: 10px;
     display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    align-items: center;
+    gap: 6px;
   }
 
-  &__question,
-  &__editor {
-    background-color: #f9fafb;
-    padding: 1rem;
-    border-radius: 6px;
-    border: 1px solid #e5e7eb;
-  }
-
-  &__editor .monaco-editor {
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-}
-
-  &__editor button {
-    padding: 0.5rem 1rem;
-    background-color: #2563eb;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  &__results {
-    margin-top: 2rem;
-    overflow-x: auto;
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
-
-    th,
-    td {
-      border: 1px solid #e5e7eb;
-      padding: 0.5rem;
-      text-align: left;
-    }
-
-    th {
-      background-color: #f3f4f6;
-      font-weight: 600;
-    }
-  }
-
-  .error {
-    color: red;
-    margin-top: 0.5rem;
-  }
-  .hint-box {
-  margin-top: 1rem;
-  padding: 1rem;
-  background-color: #eef2ff;
-  border: 1px solid #c7d2fe;
-  border-radius: 6px;
-
-  h4 {
-    margin: 0 0 0.5rem 0;
+  p {
+    font-size: 0.9rem;
+    color: #c7d2fe;
+    line-height: 1.7;
   }
 }
+
+// ─── Results Panel ────────────────────────────────────────────────────────────
+.attempt-page__results {
+  margin-top: 24px;
+  @include glass-card;
+  overflow: hidden;
+  padding: 0;
+
+  &:hover {
+    transform: none;
+  }
 }
 
-/* Desktop Layout (1024px and above) */
-@media (min-width: 1024px) {
-  .attempt-page {
-    &__content {
-      flex-direction: row;
+.results-table-wrap {
+  overflow-x: auto;
+  padding: 0 0 4px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  min-width: 400px;
+}
+
+thead {
+  tr {
+    background: rgba(0, 229, 255, 0.06);
+    border-bottom: 1px solid $border-card;
+  }
+
+  th {
+    padding: 12px 16px;
+    text-align: left;
+    font-family: $font-mono;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: $accent;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+}
+
+tbody {
+  tr {
+    border-bottom: 1px solid $border-subtle;
+    transition: background $transition-fast;
+
+    &:nth-child(even) {
+      background: rgba(255, 255, 255, 0.015);
     }
 
-    &__question,
-    &__editor {
-      flex: 1;
+    &:last-child {
+      border-bottom: none;
     }
+
+    &:hover {
+      background: rgba(0, 229, 255, 0.05);
+    }
+  }
+
+  td {
+    padding: 11px 16px;
+    color: $text-secondary;
+    font-family: $font-mono;
+    font-size: 0.825rem;
+    white-space: nowrap;
   }
 }

@@ -1,4 +1,45 @@
-$primary-color: #2563eb;
-$secondary-color: #1e293b;
-$background-color: #f8fafc;
-$text-color: #111827;
+// ─── Color Palette ───────────────────────────────────────────────────────────
+$bg-deep:        #050b18;
+$bg-mid:         #0d1b2a;
+$bg-surface:     rgba(13, 28, 48, 0.75);
+$bg-card:        rgba(10, 22, 40, 0.80);
+
+$accent:         #00e5ff;
+$accent-dim:     #00b8d9;
+$accent-glow:    rgba(0, 229, 255, 0.25);
+$accent-glow-lg: rgba(0, 229, 255, 0.12);
+
+$success:        #00ff94;
+$success-dim:    rgba(0, 255, 148, 0.15);
+$warning:        #ffa500;
+$warning-dim:    rgba(255, 165, 0, 0.15);
+$error:          #ff4d6d;
+$error-dim:      rgba(255, 77, 109, 0.15);
+
+$text-primary:   #e2f0ff;
+$text-secondary: #8ba8c8;
+$text-muted:     #4a6480;
+
+$border-subtle:       rgba(0, 229, 255, 0.12);
+$border-card:         rgba(0, 229, 255, 0.18);
+$border-card-hover:   rgba(0, 229, 255, 0.45);
+
+// ─── Typography ──────────────────────────────────────────────────────────────
+$font-mono: 'Fira Code', 'Cascadia Code', monospace;
+$font-sans: 'Inter', system-ui, sans-serif;
+
+// ─── Spacing & Shape ─────────────────────────────────────────────────────────
+$radius-sm:  6px;
+$radius-md:  12px;
+$radius-lg:  18px;
+$radius-pill: 999px;
+
+// ─── Shadows ─────────────────────────────────────────────────────────────────
+$shadow-card:       0 4px 24px rgba(0, 0, 0, 0.45), 0 0 0 1px $border-card;
+$shadow-card-hover: 0 8px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px $border-card-hover, 0 0 24px $accent-glow;
+$shadow-btn:        0 0 14px $accent-glow;
+$shadow-btn-hover:  0 0 28px rgba(0, 229, 255, 0.55), 0 4px 16px rgba(0, 0, 0, 0.4);
+
+// ─── Transitions ─────────────────────────────────────────────────────────────
+$transition-fast:   all 0.18s ease;
+$transition-smooth: all 0.3s ease;
