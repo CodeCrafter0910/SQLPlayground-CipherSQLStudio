@@ -12,7 +12,7 @@ function AttemptPage() {
   const [loadingHint, setLoadingHint] = useState(false);
 
   const executeQuery = () => {
-    fetch("https://sqlplayground-ciphersqlstudio.vercel.app/api/execute", {
+    fetch(`${import.meta.env.VITE_API_URL}/api/execute`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -35,7 +35,7 @@ function AttemptPage() {
   const getHint = () => {
     setLoadingHint(true);
 
-    fetch("https://sqlplayground-ciphersqlstudio.vercel.app/api/hint", {
+    fetch(`${import.meta.env.VITE_API_URL}/api/hint`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

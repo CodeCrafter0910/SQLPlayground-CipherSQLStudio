@@ -6,7 +6,7 @@ function AssignmentList() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("https://sqlplayground-ciphersqlstudio.onrender.com/api/assignments")
+    fetch(`${import.meta.env.VITE_API_URL}/api/assignments`)
       .then((res) => res.json())
       .then((data) => setAssignments(data))
       .catch((err) => console.error(err));
